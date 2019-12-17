@@ -15,8 +15,6 @@ lowp = data['Low'].to_numpy()
 closep = data['Close'].to_numpy()
 volume = data['Volume'].to_numpy()
 
-# SMA = talib.SMA(closep, timeperiod=7)
-
 data_training = data[data['Date'] < '2018-01-01'].copy()
 data_test = data[data['Date'] >= '2018-01-01'].copy()
 

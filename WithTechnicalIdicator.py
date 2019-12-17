@@ -6,26 +6,51 @@ from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold
+import talib
+import numpy as np
 
 # load dataset
-dataframe = read_csv("new.csv", header=None)
-dataset = dataframe.values
+df_data = read_csv("VTR_data.csv", header=None)
+np_data = df_data.values
+
+
+df_result = read_csv("VTR.result.csv", header=None)
+np_result = df_result.values
+
+openp = np_data[:, 0]
+highp = np_data[:, 1]
+lowp = np_data[:, 2]
+closep = np_data[:, 3]
+volume = np_data[:, 4]
+
+WMA = talib.WMA(closep, timeperiod=20)
+SMA = talib.SMA(closep, timeperiod=20)
+EMA = talib.SMA(closep, timeperiod=20)
+OBV = talib.OBV(closep, volume)
+RSI = talib.RSI(closep, timeperiod=20)
+
+# np_data = np.concatenate((np_data, WMA[:, None]), axis=1)
+# np_data = np.concatenate((np_data, SMA[:, None]), axis=1)
+# np_data = np.concatenate((np_data, EMA[:, None]), axis=1)
+np_data = np.concatenate((np_data, OBV[:, None]), axis=1)
+# np_data = np.concatenate((np_data, RSI[:, None]), axis=1)
+
 # split into input (X) and output (Y) variables
-X = dataset[:, 0:5].astype(float)
-Y = dataset[:, 5]
+X = np_data[:, 0:6].astype(float)
+Y = np_result[:, 0]
+
 # encode class values as integers
 encoder = LabelEncoder()
 encoder.fit(Y)
 encoded_Y = encoder.transform(Y)
 
-X = X.reshape(4697, 1, 5)
-
+X = X.reshape(1259, 1, 6)
 
 # baseline model
 def create_baseline():
     # create model
     model = Sequential()
-    model.add(LSTM(150, input_shape=(1, 5), activation='relu'))
+    model.add(LSTM(200, input_shape=(1, 6), activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     # Compile model
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
